@@ -3,7 +3,9 @@ from soni_translate.logging_setup import (
     logger,
     set_logging_level,
     configure_logging_libs,
-); configure_logging_libs() # noqa
+);
+
+configure_logging_libs()  # noqa
 import whisperx
 import torch
 import os
@@ -69,6 +71,8 @@ from voice_main import ClassVoices
 import argparse
 import time
 import hashlib
+
+from soni_translate.bilibili_api import get_video_info
 
 directories = [
     "downloads",
@@ -217,7 +221,6 @@ class SoniTrCache:
         )
 
         if media != self.cache["media"][0] or force:
-
             # Clear cache
             self.cache = {key: [] for key in self.cache}
             self.cache["media"] = [[]]
@@ -296,52 +299,52 @@ class SoniTranslate(SoniTrCache):
         return result
 
     def multilingual_media_conversion(
-        self,
-        media_file,
-        link_media,
-        directory_input,
-        YOUR_HF_TOKEN,
-        preview=False,
-        WHISPER_MODEL_SIZE="large-v3",
-        batch_size=16,
-        compute_type="float16",
-        SOURCE_LANGUAGE="Automatic detection",
-        TRANSLATE_AUDIO_TO="English (en)",
-        min_speakers=1,
-        max_speakers=2,
-        tts_voice00="en-AU-WilliamNeural-Male",
-        tts_voice01="en-CA-ClaraNeural-Female",
-        tts_voice02="en-GB-ThomasNeural-Male",
-        tts_voice03="en-GB-SoniaNeural-Female",
-        tts_voice04="en-NZ-MitchellNeural-Male",
-        tts_voice05="en-GB-MaisieNeural-Female",
-        video_output_name="",
-        AUDIO_MIX_METHOD="Adjusting volumes and mixing audio",
-        max_accelerate_audio=2.1,
-        acceleration_rate_regulation=False,
-        volume_original_audio=0.25,
-        volume_translated_audio=1.80,
-        output_format_subtitle="srt",
-        get_translated_text=False,
-        get_video_from_text_json=False,
-        text_json="{}",
-        diarization_model="pyannote_2.1",
-        translate_process="google_translator_batch",
-        subtitle_file=None,
-        output_type="video (mp4)",
-        voiceless_track=False,
-        voice_imitation=False,
-        voice_imitation_max_segments=3,
-        voice_imitation_vocals_dereverb=False,
-        voice_imitation_remove_previous=True,
-        voice_imitation_method="freevc",
-        dereverb_automatic_xtts=True,
-        divide_text_segments_by="",
-        soft_subtitles_to_video=False,
-        burn_subtitles_to_video=False,
-        enable_cache=False,
-        is_gui=False,
-        progress=gr.Progress(),
+            self,
+            media_file,
+            link_media,
+            directory_input,
+            YOUR_HF_TOKEN,
+            preview=False,
+            WHISPER_MODEL_SIZE="large-v3",
+            batch_size=16,
+            compute_type="float16",
+            SOURCE_LANGUAGE="Automatic detection",
+            TRANSLATE_AUDIO_TO="English (en)",
+            min_speakers=1,
+            max_speakers=2,
+            tts_voice00="en-AU-WilliamNeural-Male",
+            tts_voice01="en-CA-ClaraNeural-Female",
+            tts_voice02="en-GB-ThomasNeural-Male",
+            tts_voice03="en-GB-SoniaNeural-Female",
+            tts_voice04="en-NZ-MitchellNeural-Male",
+            tts_voice05="en-GB-MaisieNeural-Female",
+            video_output_name="",
+            AUDIO_MIX_METHOD="Adjusting volumes and mixing audio",
+            max_accelerate_audio=2.1,
+            acceleration_rate_regulation=False,
+            volume_original_audio=0.25,
+            volume_translated_audio=1.80,
+            output_format_subtitle="srt",
+            get_translated_text=False,
+            get_video_from_text_json=False,
+            text_json="{}",
+            diarization_model="pyannote_2.1",
+            translate_process="google_translator_batch",
+            subtitle_file=None,
+            output_type="video (mp4)",
+            voiceless_track=False,
+            voice_imitation=False,
+            voice_imitation_max_segments=3,
+            voice_imitation_vocals_dereverb=False,
+            voice_imitation_remove_previous=True,
+            voice_imitation_method="freevc",
+            dereverb_automatic_xtts=True,
+            divide_text_segments_by="",
+            soft_subtitles_to_video=False,
+            burn_subtitles_to_video=False,
+            enable_cache=False,
+            is_gui=False,
+            progress=gr.Progress(),
     ):
         if not YOUR_HF_TOKEN:
             YOUR_HF_TOKEN = os.getenv("YOUR_HF_TOKEN")
@@ -522,9 +525,9 @@ class SoniTranslate(SoniTrCache):
                 divide_text_segments_by,
                 self.align_language
             ], {
-                "result": self.result,
-                "align_language": self.align_language
-            }):
+                                          "result": self.result,
+                                          "align_language": self.align_language
+                                      }):
                 if self.align_language in ["ja", "zh"]:
                     divide_text_segments_by += "|!|?|...|。"
                 if divide_text_segments_by:
@@ -539,11 +542,11 @@ class SoniTranslate(SoniTrCache):
             if not self.task_in_cache("diarize", [
                 min_speakers,
                 max_speakers,
-                YOUR_HF_TOKEN[:len(YOUR_HF_TOKEN)//2],
+                YOUR_HF_TOKEN[:len(YOUR_HF_TOKEN) // 2],
                 diarization_model
             ], {
-                "result": self.result
-            }):
+                                          "result": self.result
+                                      }):
                 prog_disp("Diarizing...", 0.60, is_gui, progress=progress)
                 diarize_model_select = diarization_models[diarization_model]
                 self.result_diarize = diarize_speech(
@@ -561,8 +564,8 @@ class SoniTranslate(SoniTrCache):
                 TRANSLATE_AUDIO_TO,
                 translate_process
             ], {
-                "result_diarize": self.result_diarize
-            }):
+                                          "result_diarize": self.result_diarize
+                                      }):
                 prog_disp("Translating...", 0.70, is_gui, progress=progress)
                 self.result_diarize["segments"] = translate_text(
                     self.result_diarize["segments"],
@@ -608,8 +611,8 @@ class SoniTranslate(SoniTrCache):
             output_format_subtitle,
             TRANSLATE_AUDIO_TO
         ], {
-            "result_diarize": self.result_diarize
-        }):
+                                      "result_diarize": self.result_diarize
+                                  }):
             self.sub_file = process_subtitles(
                 self.result_source_lang,
                 self.align_language,
@@ -647,8 +650,8 @@ class SoniTranslate(SoniTrCache):
             tts_voice05,
             dereverb_automatic_xtts
         ], {
-            "sub_file": self.sub_file
-        }):
+                                      "sub_file": self.sub_file
+                                  }):
             prog_disp("Text to speech...", 0.80, is_gui, progress=progress)
             self.valid_speakers = audio_segmentation_to_voice(
                 self.result_diarize,
@@ -710,14 +713,14 @@ class SoniTranslate(SoniTrCache):
             cc_index_values,
             cc_transpose_values
         ], {
-            "valid_speakers": self.valid_speakers
-        }):
+                                      "valid_speakers": self.valid_speakers
+                                  }):
             audio_files, speakers_list = accelerate_segments(
-                    self.result_diarize,
-                    max_accelerate_audio,
-                    self.valid_speakers,
-                    acceleration_rate_regulation,
-                )
+                self.result_diarize,
+                max_accelerate_audio,
+                self.valid_speakers,
+                acceleration_rate_regulation,
+            )
 
             # Voice Imitation (Tone color converter)
             if voice_imitation:
@@ -867,19 +870,19 @@ class SoniTranslate(SoniTrCache):
         return output
 
     def multilingual_docs_conversion(
-        self,
-        string_text,  # string
-        document=None,  # doc path gui
-        directory_input="",  # doc path
-        SOURCE_LANGUAGE="English (en)",
-        TRANSLATE_AUDIO_TO="English (en)",
-        tts_voice00="en-AU-WilliamNeural-Male",
-        name_final_file="sample",
-        translate_process="google_translator_iterative",
-        output_type="audio",
-        chunk_size=None,
-        is_gui=False,
-        progress=gr.Progress(),
+            self,
+            string_text,  # string
+            document=None,  # doc path gui
+            directory_input="",  # doc path
+            SOURCE_LANGUAGE="English (en)",
+            TRANSLATE_AUDIO_TO="English (en)",
+            tts_voice00="en-AU-WilliamNeural-Male",
+            name_final_file="sample",
+            translate_process="google_translator_iterative",
+            output_type="audio",
+            chunk_size=None,
+            is_gui=False,
+            progress=gr.Progress(),
     ):
         SOURCE_LANGUAGE = LANGUAGES[SOURCE_LANGUAGE]
         if translate_process != "disable_translation":
@@ -919,8 +922,8 @@ class SoniTranslate(SoniTrCache):
         )
 
         if (
-            output_type == "text"
-            and translate_process == "disable_translation"
+                output_type == "text"
+                and translate_process == "disable_translation"
         ):
             return result_file_path
 
@@ -970,10 +973,10 @@ class SoniTranslate(SoniTrCache):
 
         # fix format and set folder output
         audio_files, speakers_list = accelerate_segments(
-                result_diarize,
-                1.0,
-                valid_speakers,
-            )
+            result_diarize,
+            1.0,
+            valid_speakers,
+        )
 
         # custom voice
         if os.getenv("VOICES_MODELS") == "ENABLE":
@@ -996,21 +999,25 @@ class SoniTranslate(SoniTrCache):
         return final_wav_file
 
 
-title = "<center><strong><font size='7'>📽️ SoniTranslate 🈷️</font></strong></center>"
-
+title = "<center><strong><font size='7'>📽️ GauBaoTranslate 🈷️</font></strong></center>"
+def bilibili_tab_click():
+    video_info = get_video_info("BV1Hc411t7Em")
+    if video_info:
+        logger("Thông tin video:")
+        logger(video_info)
 
 def create_gui(theme, logs_in_gui=False):
     with gr.Blocks(theme=theme) as app:
         gr.Markdown(title)
-        gr.Markdown(lg_conf["description"])
 
         with gr.Tab(lg_conf["tab_translate"]):
             with gr.Row():
                 with gr.Column():
                     input_data_type = gr.Dropdown(
                         ["SUBMIT VIDEO", "URL", "Find Video Path"],
-                        value="SUBMIT VIDEO",
+                        value="URL",
                         label=lg_conf["video_source"],
+                        visible=False,
                     )
 
                     def swap_visibility(data_type):
@@ -1034,14 +1041,13 @@ def create_gui(theme, logs_in_gui=False):
                             )
 
                     video_input = gr.File(
+                        visible=False,
                         label="VIDEO",
                         file_count="multiple",
                         type="filepath",
                     )
                     blink_input = gr.Textbox(
-                        visible=False,
                         label=lg_conf["link_label"],
-                        info=lg_conf["link_info"],
                         placeholder=lg_conf["link_ph"],
                     )
                     directory_input = gr.Textbox(
@@ -1063,12 +1069,14 @@ def create_gui(theme, logs_in_gui=False):
                         value=LANGUAGES_LIST[0],
                         label=lg_conf["sl_label"],
                         info=lg_conf["sl_info"],
+                        visible=False,
                     )
                     TRANSLATE_AUDIO_TO = gr.Dropdown(
                         LANGUAGES_LIST[1:],
-                        value="English (en)",
+                        value="Vietnamese (vi)",
                         label=lg_conf["tat_label"],
                         info=lg_conf["tat_info"],
+                        visible=False,
                     )
 
                     gr.HTML("<hr></h2>")
@@ -1086,7 +1094,7 @@ def create_gui(theme, logs_in_gui=False):
                     max_speakers = gr.Slider(
                         1,
                         MAX_TTS,
-                        value=2,
+                        value=1,
                         step=1,
                         label=lg_conf["max_sk"],
                     )
@@ -1101,16 +1109,16 @@ def create_gui(theme, logs_in_gui=False):
 
                     tts_voice00 = gr.Dropdown(
                         tts_info.tts_list(),
-                        value="en-AU-WilliamNeural-Male",
+                        value="vi-VN-NamMinhNeural-Male",
                         label=lg_conf["sk1"],
                         visible=True,
                         interactive=True,
                     )
                     tts_voice01 = gr.Dropdown(
                         tts_info.tts_list(),
-                        value="en-CA-ClaraNeural-Female",
+                        value="vi-VN-HoaiMyNeural-Female",
                         label=lg_conf["sk2"],
-                        visible=True,
+                        visible=False,
                         interactive=True,
                     )
                     tts_voice02 = gr.Dropdown(
@@ -1156,8 +1164,8 @@ def create_gui(theme, logs_in_gui=False):
 
                     with gr.Column():
                         with gr.Accordion(
-                            lg_conf["vc_title"],
-                            open=False,
+                                lg_conf["vc_title"],
+                                open=False,
                         ):
                             gr.Markdown(lg_conf["vc_subtitle"])
                             voice_imitation_gui = gr.Checkbox(
@@ -1200,8 +1208,8 @@ def create_gui(theme, logs_in_gui=False):
                     if xtts_enabled:
                         with gr.Column():
                             with gr.Accordion(
-                                lg_conf["xtts_title"],
-                                open=False,
+                                    lg_conf["xtts_title"],
+                                    open=False,
                             ):
                                 gr.Markdown(lg_conf["xtts_subtitle"])
                                 wav_speaker_file = gr.File(
@@ -1249,7 +1257,7 @@ def create_gui(theme, logs_in_gui=False):
 
                     with gr.Column():
                         with gr.Accordion(
-                            lg_conf["extra_setting"], open=False
+                                lg_conf["extra_setting"], open=False
                         ):
                             audio_accelerate = gr.Slider(
                                 label=lg_conf["acc_max_label"],
@@ -1282,7 +1290,7 @@ def create_gui(theme, logs_in_gui=False):
                             volume_original_mix = gr.Slider(
                                 label=lg_conf["vol_ori"],
                                 info="for Adjusting volumes and mixing audio",
-                                value=0.25,
+                                value=0.1,
                                 step=0.05,
                                 minimum=0.0,
                                 maximum=2.50,
@@ -1292,7 +1300,7 @@ def create_gui(theme, logs_in_gui=False):
                             volume_translated_mix = gr.Slider(
                                 label=lg_conf["vol_tra"],
                                 info="for Adjusting volumes and mixing audio",
-                                value=1.80,
+                                value=2.4,
                                 step=0.05,
                                 minimum=0.0,
                                 maximum=2.50,
@@ -1316,7 +1324,7 @@ def create_gui(theme, logs_in_gui=False):
 
                             def get_subs_path(type_subs):
                                 if os.path.exists(
-                                    f"sub_ori.{type_subs}"
+                                        f"sub_ori.{type_subs}"
                                 ) and os.path.exists(f"sub_tra.{type_subs}"):
                                     return (
                                         f"sub_ori.{type_subs}",
@@ -1500,101 +1508,12 @@ def create_gui(theme, logs_in_gui=False):
 
                     gr.HTML("<hr></h2>")
 
-                    if (
-                        os.getenv("YOUR_HF_TOKEN") is None
-                        or os.getenv("YOUR_HF_TOKEN") == ""
-                    ):
-                        HFKEY = gr.Textbox(
-                            visible=True,
-                            label="HF Token",
-                            info=lg_conf["ht_token_info"],
-                            placeholder=lg_conf["ht_token_ph"],
-                        )
-                    else:
-                        HFKEY = gr.Textbox(
-                            visible=False,
-                            label="HF Token",
-                            info=lg_conf["ht_token_info"],
-                            placeholder=lg_conf["ht_token_ph"],
-                        )
-
-                    gr.Examples(
-                        examples=[
-                            [
-                                ["./assets/Video_main.mp4"],
-                                "",
-                                "",
-                                "",
-                                False,
-                                whisper_model_default,
-                                16,
-                                list_compute_type[1],
-                                "Spanish (es)",
-                                "English (en)",
-                                1,
-                                2,
-                                "en-AU-WilliamNeural-Male",
-                                "en-CA-ClaraNeural-Female",
-                                "en-GB-ThomasNeural-Male",
-                                "en-GB-SoniaNeural-Female",
-                                "en-NZ-MitchellNeural-Male",
-                                "en-GB-MaisieNeural-Female",
-                                "",
-                                "Adjusting volumes and mixing audio",
-                            ],
-                            [
-                                None,
-                                "https://www.youtube.com/watch?v=5ZeHtRKHl7Y",
-                                "",
-                                "",
-                                False,
-                                whisper_model_default,
-                                16,
-                                list_compute_type[1],
-                                "Japanese (ja)",
-                                "English (en)",
-                                1,
-                                1,
-                                "en-CA-ClaraNeural-Female",
-                                "en-AU-WilliamNeural-Male",
-                                "en-GB-ThomasNeural-Male",
-                                "en-GB-SoniaNeural-Female",
-                                "en-NZ-MitchellNeural-Male",
-                                "en-GB-MaisieNeural-Female",
-                                "",
-                                "Adjusting volumes and mixing audio",
-                            ],
-                        ],  # no update
-                        fn=SoniTr.batch_multilingual_media_conversion,
-                        inputs=[
-                            video_input,
-                            blink_input,
-                            directory_input,
-                            HFKEY,
-                            PREVIEW,
-                            WHISPER_MODEL_SIZE,
-                            batch_size,
-                            compute_type,
-                            SOURCE_LANGUAGE,
-                            TRANSLATE_AUDIO_TO,
-                            min_speakers,
-                            max_speakers,
-                            tts_voice00,
-                            tts_voice01,
-                            tts_voice02,
-                            tts_voice03,
-                            tts_voice04,
-                            tts_voice05,
-                            VIDEO_OUTPUT_NAME,
-                            AUDIO_MIX,
-                            audio_accelerate,
-                            acceleration_rate_regulation_gui,
-                            volume_original_mix,
-                            volume_translated_mix,
-                            sub_type_output,
-                        ],
-                        outputs=[video_output],
-                        cache_examples=False,
+                    HFKEY = gr.Textbox(
+                        visible=False,
+                        label="HF Token",
+                        info=lg_conf["ht_token_info"],
+                        placeholder=lg_conf["ht_token_ph"],
+                        value="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"
                     )
 
         with gr.Tab(lg_conf["tab_docs"]):
@@ -1692,7 +1611,7 @@ def create_gui(theme, logs_in_gui=False):
 
                             with gr.Column():
                                 with gr.Accordion(
-                                    lg_conf["extra_setting"], open=False
+                                        lg_conf["extra_setting"], open=False
                                 ):
                                     docs_valid_translate_process = [
                                         "google_translator_iterative",
@@ -2083,12 +2002,12 @@ def create_gui(theme, logs_in_gui=False):
                         ],
                     )
 
-        with gr.Tab(lg_conf["tab_help"]):
-            gr.Markdown(lg_conf["tutorial"])
+        with gr.Tab("Bilibili") as bilibili_tab:
+
             gr.Markdown(news)
+            bilibili_tab.onclick(bilibili_tab_click)
 
             def play_sound_alert(play_sound):
-
                 if not play_sound:
                     return None
 

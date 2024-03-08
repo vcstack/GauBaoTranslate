@@ -77,19 +77,6 @@ SonyTranslate is a powerful and user-friendly web application that allows you to
 | si            | Sinhala    |
 | su            | Sundanese  |
 
-## Example:
-
-### Original audio
-
-https://github.com/R3gm/SoniTranslate/assets/114810545/db9e78c0-b228-4e81-9704-e62d5cc407a3
-
-
-
-### Translated audio
-
-https://github.com/R3gm/SoniTranslate/assets/114810545/6a8ddc65-a46f-4653-9726-6df2615f0ef9
-
-
 ## Colab Runtime
 
 To run SoniTranslate using Colab Runtime: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/R3gm/SoniTranslate/blob/main/SoniTranslate_Colab.ipynb)
