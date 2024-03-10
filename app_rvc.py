@@ -2005,7 +2005,7 @@ def create_gui(theme, logs_in_gui=False):
         with gr.Tab("Bilibili") as bilibili_tab:
 
             gr.Markdown(news)
-            bilibili_tab.onclick(bilibili_tab_click)
+           # bilibili_tab.onclick(bilibili_tab_click)
 
             def play_sound_alert(play_sound):
                 if not play_sound:
