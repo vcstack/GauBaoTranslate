@@ -1,3 +1,5 @@
+import asyncio
+
 import gradio as gr
 from soni_translate.logging_setup import (
     logger,
@@ -62,7 +64,7 @@ from soni_translate.text_multiformat_processor import (
     process_subtitles,
     break_aling_segments,
 )
-from soni_translate.languages_gui import language_data, news
+from soni_translate.languages_gui import language_data, list_move
 import copy
 import logging
 import json
@@ -72,7 +74,7 @@ import argparse
 import time
 import hashlib
 
-from soni_translate.bilibili_api import get_video_info
+from soni_translate.bilibili_utils import get_all_videos
 
 directories = [
     "downloads",
@@ -1000,11 +1002,28 @@ class SoniTranslate(SoniTrCache):
 
 
 title = "<center><strong><font size='7'>📽️ GauBaoTranslate 🈷️</font></strong></center>"
-def bilibili_tab_click():
-    video_info = get_video_info("BV1Hc411t7Em")
-    if video_info:
-        logger("Thông tin video:")
-        logger(video_info)
+
+async def fetch_data():
+    bilibili_videos = await get_all_videos()
+    html = generate_html_table(bilibili_videos)
+    gr.HTML(html)
+
+
+def generate_html_table(videos):
+    table_html = "<table><tr><th>Short Link</th><th>Title</th><th>Cover</th><th>Pubtime</th><th>Duration</th></tr>"
+
+    for video in videos:
+        short_link = video['short_link']
+        title = video['title']
+        cover = video['cover']
+        pubtime = video['pubtime']
+        duration = round(video['duration'] / 60, 2)
+        table_html += f"<tr><td>{short_link}</td><td>{title}</td><td><img src='{cover}' style='max-height: 100px; max-width: 100px;'></td><td>{pubtime}</td><td>{duration}</td></tr>"
+
+    table_html += "</table>"
+
+    return table_html
+
 
 def create_gui(theme, logs_in_gui=False):
     with gr.Blocks(theme=theme) as app:
@@ -2003,9 +2022,35 @@ def create_gui(theme, logs_in_gui=False):
                     )
 
         with gr.Tab("Bilibili") as bilibili_tab:
+            with gr.Column():
 
-            gr.Markdown(news)
-           # bilibili_tab.onclick(bilibili_tab_click)
+                asyncio.run(fetch_data())
+
+                # names = [item["name"] for item in list_move if "name" in item]
+                # phim = gr.Dropdown(
+                #     sorted(names),
+                #     value=names[0],
+                #     label="Phim",
+                #     visible=True,
+                #     interactive=True,
+                # )
+                # check_video = gr.Button("Check Video Bilibili")
+                # list_phim = gr.Textbox(
+                #     label="Text",
+                #     value="This is an example",
+                #     info="write a text",
+                #     placeholder="...",
+                #     lines=5,
+                # )
+                # TODO get api and show list move
+                # check_video.click(
+                #     ,
+                #     inputs=[
+                #         phim,
+                #     ],
+                #     outputs=[list_phim],
+                # )
+
 
             def play_sound_alert(play_sound):
                 if not play_sound:
@@ -2350,7 +2395,6 @@ if __name__ == "__main__":
     # list_tts = tts_info.tts_list()
 
     lg_conf = get_language_config(language_data, language=args.language)
-
     app = create_gui(args.theme, logs_in_gui=args.logs_in_gui)
 
     app.queue()
