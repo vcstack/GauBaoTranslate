@@ -12,7 +12,7 @@ async def fetch_media_list(uid):
     return media_list
 
 
-async def get_all_videos(uid=3493090788641055, tid=47):
+async def get_all_videos(uid=1028656984, tid=47):
     media_list = await fetch_media_list(uid)
     mapped_info = []
     videos = media_list['media_list']

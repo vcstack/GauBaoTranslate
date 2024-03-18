@@ -17,7 +17,7 @@ async def get_all_videos(uid):
 
 
 async def main():
-    media_list = await get_all_videos(3493090788641055)
+    media_list = await get_all_videos(1028656984)
     mapped_info = []
     videos = media_list['media_list']
     videos.sort(key=lambda x: x['pubtime'], reverse=True)  # sort giảm dần theo thời gian public
@@ -40,4 +40,4 @@ asyncio.run(main())
 
 # chàng trai đa tình: 265561953
 # bộ tộc người rừng: 3493090788641055
-# tái sinh khỉ đột:
+# tái sinh khỉ đột:1028656984
