@@ -74,7 +74,7 @@ import argparse
 import time
 import hashlib
 
-from soni_translate.bilibili_utils import get_all_videos
+from soni_translate.bilibili_utils import get_all_videos, Moves
 
 directories = [
     "downloads",
@@ -1003,10 +1003,13 @@ class SoniTranslate(SoniTrCache):
 
 title = "<center><strong><font size='7'>📽️ GauBaoTranslate 🈷️</font></strong></center>"
 
-async def fetch_data():
-    bilibili_videos = await get_all_videos()
+
+async def fetch_data(name):
+    uid = Moves[name].value
+    bilibili_videos = await get_all_videos(uid=uid)
     html = generate_html_table(bilibili_videos)
-    gr.HTML(html)
+
+    return html
 
 
 def generate_html_table(videos):
@@ -1027,7 +1030,7 @@ def generate_html_table(videos):
 
 def create_gui(theme, logs_in_gui=False):
     with gr.Blocks(theme=theme) as app:
-        gr.Markdown(title)
+        # gr.Markdown(title)
 
         with gr.Tab(lg_conf["tab_translate"]):
             with gr.Row():
@@ -2022,57 +2025,54 @@ def create_gui(theme, logs_in_gui=False):
                     )
 
         with gr.Tab("Bilibili") as bilibili_tab:
-            with gr.Column():
+            with gr.Row():
+                with gr.Column():
+                    list_move = list(Moves.__members__.keys())
+                    input_move = gr.Dropdown(
+                        list_move,
+                        value=list_move[0],
+                        label='Select moves',
+                        visible=True,
+                    )
+                    init_data = fetch_data(list_move[0])
+                    table_html = gr.HTML(init_data)
+                    input_move.change(
+                        fn=fetch_data,
+                        inputs=input_move,
+                        outputs=[table_html]
+                    )
 
-                asyncio.run(fetch_data())
+                    # btn_load = gr.Button("Load")
+                    # btn_load.click(
+                    #     fetch_data,
+                    #     inputs=input_move,
+                    #     outputs=[table_html], queue=True
+                    # )
 
-                # names = [item["name"] for item in list_move if "name" in item]
-                # phim = gr.Dropdown(
-                #     sorted(names),
-                #     value=names[0],
-                #     label="Phim",
-                #     visible=True,
-                #     interactive=True,
-                # )
-                # check_video = gr.Button("Check Video Bilibili")
-                # list_phim = gr.Textbox(
-                #     label="Text",
-                #     value="This is an example",
-                #     info="write a text",
-                #     placeholder="...",
-                #     lines=5,
-                # )
-                # TODO get api and show list move
-                # check_video.click(
-                #     ,
-                #     inputs=[
-                #         phim,
-                #     ],
-                #     outputs=[list_phim],
-                # )
+                with gr.Column():
+                    # btn = gr.Button("Load")
 
+                    def play_sound_alert(play_sound):
+                        if not play_sound:
+                            return None
 
-            def play_sound_alert(play_sound):
-                if not play_sound:
-                    return None
+                        # silent_sound = "assets/empty_audio.mp3"
+                        sound_alert = "assets/sound_alert.mp3"
 
-                # silent_sound = "assets/empty_audio.mp3"
-                sound_alert = "assets/sound_alert.mp3"
+                        time.sleep(0.25)
+                        # yield silent_sound
+                        yield None
 
-                time.sleep(0.25)
-                # yield silent_sound
-                yield None
+                        time.sleep(0.25)
+                        yield sound_alert
 
-                time.sleep(0.25)
-                yield sound_alert
-
-            sound_alert_notification = gr.Audio(
-                value=None,
-                type="filepath",
-                format="mp3",
-                autoplay=True,
-                visible=False,
-            )
+                    sound_alert_notification = gr.Audio(
+                        value=None,
+                        type="filepath",
+                        format="mp3",
+                        autoplay=True,
+                        visible=False,
+                    )
 
         if logs_in_gui:
             logger.info("Logs in gui need public url")

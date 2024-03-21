@@ -26,7 +26,7 @@ transformers
 accelerate
 optimum
 sentencepiece
-srt
+srt~=3.5.3
 onnxruntime-gpu
 git+https://github.com/R3gm/openvoice_package.git@lite
 # Documents
@@ -36,3 +36,8 @@ python-docx
 # after this
 # pip install git+https://github.com/omry/omegaconf.git@refs/pull/1137/merge
 
+
+numpy~=1.19.3
+scipy~=1.7.3
+tqdm~=4.66.2
+requests~=2.31.0

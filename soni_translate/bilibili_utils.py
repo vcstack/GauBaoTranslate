@@ -1,9 +1,13 @@
 import datetime
-import json
 
 from bilibili_api import user
 from deep_translator import GoogleTranslator
+from enum import Enum
 
+class Moves(Enum):
+    TAI_SINH_KHI_DOT = 1028656984
+    BO_TOC_NGUOI_RUNG = 3493090788641055
+    CHANG_TRAI_DA_TINH = 265561953
 
 async def fetch_media_list(uid):
     u = user.User(uid=uid, credential=None)
@@ -12,13 +16,12 @@ async def fetch_media_list(uid):
     return media_list
 
 
-async def get_all_videos(uid=1028656984, tid=47):
+async def get_all_videos(uid=Moves.TAI_SINH_KHI_DOT.value):
     media_list = await fetch_media_list(uid)
     mapped_info = []
     videos = media_list['media_list']
-    videos = filter(lambda v: v['duration'] < 30 * 60 and v['tid'] == tid, videos)
+    videos = filter(lambda v: v['duration'] < 30 * 60, videos)
     videos = sorted(videos, key=lambda v: v['pubtime'], reverse=True)  # sort giảm dần theo thời gian public
-    print(json.dumps(videos))
     i = len(videos)
     translator = GoogleTranslator(source='auto', target='vietnamese')
     for v in videos:
@@ -28,7 +31,7 @@ async def get_all_videos(uid=1028656984, tid=47):
         mapped_info.append({
             'short_link': v['short_link'],
             'title': title,
-            'cover': v['cover'],
+            'cover': v['upper']['face'],
             'duration': v['duration'],
             'pubtime': pubtime_text,
         })
